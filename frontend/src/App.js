@@ -91,6 +91,33 @@ function App() {
     }
   };
 
+  const getWeatherIcon = (type) => {
+    switch(type) {
+      case 'Weather Query':
+        return '🌤️';
+      case 'Today':
+        return '☀️';
+      case 'Tomorrow':
+        return '🌤️';
+      case '2-day forecast':
+        return '⛅';
+      case '3-day forecast':
+        return '🌥️';
+      case 'Overall weather':
+        return '🌡️';
+      case 'Temperature':
+        return '🌡️';
+      case 'Humidity':
+        return '💧';
+      case 'Wind':
+        return '💨';
+      case 'UV index':
+        return '☀️';
+      default:
+        return '🌤️';
+    }
+  };
+
   const LoadingIndicator = () => (
     <div className="message bot loading">
       <span></span>
@@ -102,7 +129,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Weather Chatbot</h1>
+        <h1>Weather Chatbot 🌤️</h1>
       </header>
       <div className="chat-container">
         <div className="messages">
@@ -118,8 +145,12 @@ function App() {
         <div className="buttons-container">
           {currentStage === 'start' && (
             <div className="button-group">
-              <button onClick={() => sendMessage('Hi')}>Greet</button>
-              <button onClick={() => handleOptionSelect('Weather Query')}>Weather Query</button>
+              <button onClick={() => sendMessage('Hi')}>
+                {getWeatherIcon('Weather Query')} Greet
+              </button>
+              <button onClick={() => handleOptionSelect('Weather Query')}>
+                {getWeatherIcon('Weather Query')} Weather Query
+              </button>
             </div>
           )}
 
@@ -127,7 +158,7 @@ function App() {
             <div className="button-group">
               {districts.map(district => (
                 <button key={district} onClick={() => handleDistrictSelect(district)}>
-                  {district}
+                  {getWeatherIcon('Weather Query')} {district}
                 </button>
               ))}
             </div>
@@ -137,7 +168,7 @@ function App() {
             <div className="button-group">
               {forecastPeriods.map(period => (
                 <button key={period} onClick={() => handleForecastPeriodSelect(period)}>
-                  {period}
+                  {getWeatherIcon(period)} {period}
                 </button>
               ))}
             </div>
@@ -147,7 +178,7 @@ function App() {
             <div className="button-group">
               {infoTypes.map(type => (
                 <button key={type} onClick={() => handleInfoTypeSelect(type)}>
-                  {type}
+                  {getWeatherIcon(type)} {type}
                 </button>
               ))}
             </div>
