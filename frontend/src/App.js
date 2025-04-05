@@ -6,14 +6,14 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [currentStage, setCurrentStage] = useState('start');
   const [selectedDistrict, setSelectedDistrict] = useState(null);
-  const [selectedTime, setSelectedTime] = useState(null);
-  const [selectedWeatherType, setSelectedWeatherType] = useState(null);
+  const [selectedPeriod, setSelectedPeriod] = useState(null);
+  const [selectedInfoType, setSelectedInfoType] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
   const districts = ['Central', 'Wan Chai', 'Causeway Bay', 'Tai Po', 'Shatin', 'Tuen Mun', 'Yuen Long'];
-  const timePeriods = ['Current', 'Today', 'Tomorrow'];
-  const weatherTypes = ['Temperature', 'Rainfall', 'UV Index', 'Warnings', 'General Forecast'];
+  const forecastPeriods = ['Today', 'Tomorrow', '2-day forecast', '3-day forecast'];
+  const infoTypes = ['Overall weather', 'Temperature', 'Humidity', 'Wind', 'UV index'];
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -40,10 +40,15 @@ function App() {
         { text: response.data.message, isUser: false, formatted: formatMessage(response.data.message) }
       ]);
       
-      if (response.data.needs_district) {
+      if (response.data.needs_location) {
         setCurrentStage('district');
-      } else if (response.data.options && response.data.options.length > 0) {
-        setCurrentStage('options');
+      } else if (response.data.needs_forecast_period) {
+        setCurrentStage('forecast_period');
+        setSelectedDistrict(response.data.selected_location);
+      } else if (response.data.needs_info_type) {
+        setCurrentStage('info_type');
+        setSelectedDistrict(response.data.selected_location);
+        setSelectedPeriod(response.data.selected_period);
       } else {
         setCurrentStage('start');
       }
@@ -60,30 +65,28 @@ function App() {
 
   const handleDistrictSelect = (district) => {
     setSelectedDistrict(district);
-    setCurrentStage('time');
     sendMessage(`What's the weather like in ${district}?`);
   };
 
-  const handleTimeSelect = (time) => {
-    setSelectedTime(time);
-    setCurrentStage('weather_type');
-    sendMessage(`What's the weather like in ${selectedDistrict} ${time.toLowerCase()}?`);
+  const handleForecastPeriodSelect = (period) => {
+    setSelectedPeriod(period);
+    const periodText = period.toLowerCase().replace(' forecast', '');
+    const message = `Show me the ${periodText} weather forecast for ${selectedDistrict}`;
+    sendMessage(message);
   };
 
-  const handleWeatherTypeSelect = (type) => {
-    setSelectedWeatherType(type);
-    const message = `What's the ${type.toLowerCase()} in ${selectedDistrict} ${selectedTime.toLowerCase()}?`;
+  const handleInfoTypeSelect = (type) => {
+    setSelectedInfoType(type);
+    const cleanType = type.toLowerCase().replace(' weather', '');
+    const periodText = selectedPeriod.toLowerCase().replace(' forecast', '');
+    const message = `Show me the ${cleanType} for ${selectedDistrict} ${periodText} forecast`;
     sendMessage(message);
   };
 
   const handleOptionSelect = (option) => {
-    if (currentStage === 'start') {
-      if (option === 'Weather Query') {
-        setCurrentStage('district');
-      } else {
-        sendMessage(option);
-      }
-    } else if (currentStage === 'options') {
+    if (option === 'Weather Query') {
+      setCurrentStage('district');
+    } else {
       sendMessage(option);
     }
   };
@@ -130,31 +133,21 @@ function App() {
             </div>
           )}
 
-          {currentStage === 'time' && (
+          {currentStage === 'forecast_period' && (
             <div className="button-group">
-              {timePeriods.map(time => (
-                <button key={time} onClick={() => handleTimeSelect(time)}>
-                  {time}
+              {forecastPeriods.map(period => (
+                <button key={period} onClick={() => handleForecastPeriodSelect(period)}>
+                  {period}
                 </button>
               ))}
             </div>
           )}
 
-          {currentStage === 'weather_type' && (
+          {currentStage === 'info_type' && (
             <div className="button-group">
-              {weatherTypes.map(type => (
-                <button key={type} onClick={() => handleWeatherTypeSelect(type)}>
+              {infoTypes.map(type => (
+                <button key={type} onClick={() => handleInfoTypeSelect(type)}>
                   {type}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {currentStage === 'options' && (
-            <div className="button-group">
-              {messages[messages.length - 1]?.options?.map(option => (
-                <button key={option} onClick={() => handleOptionSelect(option)}>
-                  {option}
                 </button>
               ))}
             </div>
