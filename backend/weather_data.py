@@ -6,7 +6,7 @@ import re
 from operator import itemgetter
 import requests
 
-from hko.distance_calculation import distance_calculation
+import distance_calculation
 
 # Load required JSON data
 with open(pkg_resources.resource_filename(__name__, 'assets/grid_location.json')) as f:
